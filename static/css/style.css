@@ -1,0 +1,99 @@
+/* static/css/style.css */
+/* Шрифт можно заменить здесь: font-family: 'Poppins', sans-serif; */
+:root {
+  --orange: #FFA500;
+  --black: #000000;
+  --white: #ffffff;
+  --bg: #fbf8f5;
+  --card:#ffffff;
+  --muted:#666666;
+  --green:#00C851;
+  --red:#ff4444;
+}
+*{box-sizing:border-box}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family: 'Poppins', Arial, sans-serif; /* 🔄 ЗАМЕНИ ЭТУ СТРОКУ, ЕСЛИ ХОЧЕШЬ СВОЙ ШРИФТ */
+  background:var(--bg);
+  color:#222;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Container and card style (second variant) */
+.container{
+  max-width:420px;
+  margin:12px auto;
+  padding:14px;
+}
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+  margin-bottom:12px;
+}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.title{color:var(--orange);font-weight:700;font-size:22px}
+.icon-btn{background:#fff;border-radius:10px;padding:6px;box-shadow:0 4px 8px rgba(0,0,0,0.06);border:none;cursor:pointer}
+
+/* Buttons - match second variant: orange gradient, rounded */
+.btn{
+  display:block;
+  width:100%;
+  text-align:center;
+  padding:12px 14px;
+  border-radius:28px;
+  border:none;
+  font-weight:700;
+  color:var(--white);
+  background: linear-gradient(180deg, #ffb366, var(--orange));
+  box-shadow:0 6px 0 rgba(0,0,0,0.06);
+  cursor:pointer;
+  text-decoration:none;
+  font-size:16px;
+  margin:10px 0;
+}
+.btn.secondary{
+  background:#000;
+  box-shadow:0 6px 0 rgba(0,0,0,0.08);
+}
+
+/* Inputs */
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #e6e6e6;margin:8px 0;font-size:16px}
+
+/* Contacts footer */
+.contacts{background:#000;color:#fff;padding:12px;border-radius:10px;margin-top:12px;text-align:center}
+.contacts a{color:var(--orange);text-decoration:none;display:block;margin:6px 0}
+
+/* Trainer / quiz */
+#quiz-container{min-height:180px}
+#answers{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.answer{padding:12px;border-radius:10px;border:1px solid #eee;background:#fff;cursor:pointer;font-weight:700}
+
+/* Password checker */
+.progress-bar{width:100%;height:14px;background:#f0f0f0;border-radius:10px;overflow:hidden;margin-top:8px}
+.progress{height:100%;width:0%;background:var(--red);transition:width .25s linear, background .25s linear;border-radius:10px}
+
+/* Status colors */
+.status-green{color:var(--green);font-weight:700}
+.status-red{color:var(--red);font-weight:700}
+
+/* Mobile-first: styles optimized for phones (<=480px) */
+@media (max-width:480px){
+  .container{padding:12px;margin:8px}
+  .title{font-size:20px}
+  .card{padding:14px;border-radius:12px}
+  .btn{font-size:18px;padding:14px}
+  .input{font-size:16px;padding:12px}
+}
+
+/* Larger screens: center content but keep mobile look */
+@media (min-width:481px){
+  body{background:var(--bg)}
+  .container{margin:20px auto}
+  .btn{max-width:360px;margin-left:auto;margin-right:auto}
+}

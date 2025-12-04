@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Вход</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card header">
+            <div class="title">Вход</div>
+            <button class="icon-btn" onclick="location.href='/'">🏠</button>
+        </div>
+        <div class="card">
+            {% if errors %}
+            <div style="color: red; margin-bottom: 15px;">
+                {% for error in errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login">
+                <input name="email" class="input" placeholder="Email" value="{{ data.email or '' }}" required>
+                <input name="password" class="input" type="password" placeholder="Пароль" required>
+                <button class="btn" type="submit">Войти</button>
+            </form>
+
+            <p><button class="btn secondary" onclick="location.href='/register'">Зарегистрироваться</button></p>
+            <p><button class="btn" onclick="location.href='/'">Назад</button></p>
+        </div>
+        <footer class="contacts">
+            <h3>Контакты</h3>
+            <a href="tel:+77053652869">📞 +7 (705) 365-28-69</a>
+            <a href="https://instagram.com/Rosa_Mirova">📸 @Rosa_Mirova</a>
+        </footer>
+    </div>
+</body>
+</html>

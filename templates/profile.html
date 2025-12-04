@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="../static/js/script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card header">
+            <div class="title">Личный кабинет</div>
+            <button class="icon-btn" onclick="location.href='/navigation'">←</button>
+        </div>
+        <div class="card">
+            <h3>Информация о пользователе</h3>
+            {% if user %}
+            <p><strong>Имя:</strong> {{ user.name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Дата регистрации:</strong> {{ user.created_at[:10] if user.created_at else 'Неизвестно' }}</p>
+            {% endif %}
+
+            <h3>Статусы</h3>
+            <p>Ознакомление: <span id="ackStatus">Загрузка...</span></p>
+            <p>Тренажёр: <span id="trainerStatus">Загрузка...</span></p>
+            <p>Проверка пароля: <span id="pwdStatus">Загрузка...</span></p>
+
+            <p><button class="btn" onclick="location.href='/navigation'">В навигацию</button></p>
+            <p><button class="btn secondary" onclick="location.href='/logout'">Выйти из аккаунта</button></p>
+        </div>
+        <footer class="contacts">
+            <h3>Контакты</h3>
+            <a href="tel:+77053652869">📞 +7 (705) 365-28-69</a>
+            <a href="https://instagram.com/Rosa_Mirova">📸 @Rosa_Mirova</a>
+        </footer>
+    </div>
+</body>
+</html>

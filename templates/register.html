@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card header">
+            <div class="title">Регистрация</div>
+            <button class="icon-btn" onclick="location.href='/'">🏠</button>
+        </div>
+        <div class="card">
+            {% if errors %}
+            <div style="color: red; margin-bottom: 15px;">
+                {% for error in errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/register">
+                <input name="name" class="input" placeholder="Имя" value="{{ data.name or '' }}" required>
+                <input name="email" class="input" type="email" placeholder="Email" value="{{ data.email or '' }}" required>
+                <input name="password" class="input" type="password" placeholder="Пароль" required>
+                <input name="password2" class="input" type="password" placeholder="Повторите пароль" required>
+
+                <!-- Подсказки для пароля -->
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 0.9em;">
+                    <p><strong>Требования к паролю:</strong></p>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Минимум 8 символов</li>
+                        <li>Хотя бы одна заглавная буква</li>
+                        <li>Хотя бы одна строчная буква</li>
+                        <li>Хотя бы одна цифра</li>
+                        <li>Хотя бы один специальный символ</li>
+                    </ul>
+                </div>
+
+                <button class="btn" type="submit">Зарегистрироваться</button>
+            </form>
+
+            <p><button class="btn" onclick="location.href='/login'">Назад</button></p>
+        </div>
+        <footer class="contacts">
+            <h3>Контакты</h3>
+            <a href="tel:+77053652869">📞 +7 (705) 365-28-69</a>
+            <a href="https://instagram.com/Rosa_Mirova">📸 @Rosa_Mirova</a>
+        </footer>
+    </div>
+</body>
+</html>
