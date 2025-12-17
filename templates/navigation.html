@@ -9,17 +9,40 @@
 <body>
     <div class="container">
         <div class="card header">
-            <div class="title">Навигация</div>
+            <div class="title">🧭 Навигация</div>
             <button class="icon-btn" onclick="location.href='/'">🏠</button>
         </div>
-        <div class="card">
-            <button class="btn" onclick="location.href='/info'">Информационный лист</button>
-            <button class="btn" onclick="location.href='/check-password'">Проверка пароля</button>
-            <button class="btn" onclick="location.href='/trainer'">Мини‑игра</button>
-            <button class="btn" onclick="location.href='/profile'">Личный кабинет</button>
+
+        <!-- Для мобильных: обычные кнопки -->
+        <!-- Для ПК: сетка -->
+        <div class="nav-grid">
+            <div class="card">
+                <h3>📚 Обучение</h3>
+                <button class="btn" onclick="location.href='/info'">Информационный лист</button>
+                <button class="btn" onclick="location.href='/search'">Поиск советов</button>
+            </div>
+
+            <div class="card">
+                <h3>🎮 Практика</h3>
+                <button class="btn" onclick="location.href='/check-password'">Проверка пароля</button>
+                <button class="btn" onclick="location.href='/trainer'">Мини‑игра</button>
+            </div>
+
+            <div class="card">
+                <h3>👤 Аккаунт</h3>
+                <button class="btn" onclick="location.href='/profile'">Личный кабинет</button>
+                <button class="btn" onclick="location.href='/favorites'">Сохраненные пароли</button>
+            </div>
+
+            <div class="card">
+                <h3>⚙️ Система</h3>
+                <button class="btn secondary" onclick="location.href='/logout'">Выйти из аккаунта</button>
+                <button class="btn" onclick="location.href='/'">На главную</button>
+            </div>
         </div>
+
         <footer class="contacts">
-            <h3>Контакты</h3>
+            <h3>📞 Контакты</h3>
             <a href="tel:+77053652869">📞 +7 (705) 365-28-69</a>
             <a href="https://instagram.com/Rosa_Mirova">📸 @Rosa_Mirova</a>
         </footer>

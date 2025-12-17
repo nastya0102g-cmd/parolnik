@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Поиск советов</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card header">
+            <div class="title">🔍 Поиск советов</div>
+            <div>
+                <button class="icon-btn" onclick="location.href='/favorites'">⭐</button>
+                <button class="icon-btn" onclick="location.href='/profile'">👤</button>
+                <button class="icon-btn" onclick="location.href='/navigation'">←</button>
+            </div>
+        </div>
+
+        <div class="search-container-pc">
+            <!-- Фильтры -->
+            <div class="search-filters">
+                <h3>Категории</h3>
+                <button class="btn secondary" onclick="filterByCategory(null)"
+                        style="margin: 5px 0; {% if not category %}background: var(--orange){% endif %}">
+                    Все категории
+                </button>
+                {% for cat in categories %}
+                <button class="btn secondary" onclick="filterByCategory('{{ cat }}')"
+                        style="margin: 5px 0; {% if category == cat %}background: var(--orange){% endif %}">
+                    {{ cat|title }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <!-- Основной контент -->
+            <div>
+                <!-- Поиск -->
+                <div class="card">
+                    <form method="GET" action="/search" onsubmit="return handleSearch()">
+                        <input type="text" name="q" class="input"
+                               placeholder="Поиск советов по паролям..."
+                               value="{{ query or '' }}">
+                        <button type="submit" class="btn">Найти</button>
+                    </form>
+
+                    {% if query %}
+                    <p style="margin-top: 15px;">
+                        Результаты поиска для: <strong>{{ query }}</strong>
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Результаты -->
+                <div class="cards-grid">
+                    {% for tip in tips %}
+                    <div class="card">
+                        <h3>{{ tip.title }}</h3>
+                        <p>{{ tip.content[:150] }}...</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                            <span class="category-tag">{{ tip.category or 'Общее' }}</span>
+                            <button class="btn secondary"
+                                    onclick="showTipDetail('{{ tip.title }}', '{{ tip.content }}')">
+                                Подробнее
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card wide">
+                        <h3>Советы не найдены</h3>
+                        <p>Попробуйте изменить поисковый запрос или выберите другую категорию.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <footer class="contacts">
+            <h3>📞 Контакты</h3>
+            <a href="tel:+77053652869">+7 (705) 365-28-69</a>
+            <a href="https://instagram.com/Rosa_Mirova">@Rosa_Mirova</a>
+        </footer>
+    </div>
+
+    <script>
+    function filterByCategory(cat) {
+        const url = new URL(window.location);
+        if (cat) {
+            url.searchParams.set('category', cat);
+        } else {
+            url.searchParams.delete('category');
+        }
+        url.searchParams.delete('q');
+        window.location.href = url.toString();
+    }
+
+    function handleSearch() {
+        const input = document.querySelector('input[name="q"]');
+        if (input.value.trim().length < 2 && input.value.trim().length > 0) {
+            alert('Введите хотя бы 2 символа для поиска');
+            return false;
+        }
+        return true;
+    }
+
+    function showTipDetail(title, content) {
+        alert(`${title}\n\n${content}`);
+    }
+    </script>
+</body>
+</html>

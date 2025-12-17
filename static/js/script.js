@@ -1,8 +1,10 @@
-/* static/js/script.js */
 document.addEventListener('DOMContentLoaded', function(){
+    console.log("DOM Content Loaded - Password Checker");
+
     // Acknowledge info
     const ackBtn = document.getElementById('acknowledgeBtn');
     if(ackBtn){
+        console.log("Found acknowledge button");
         if(localStorage.getItem('infoViewed') === 'true'){
             ackBtn.textContent='Ознакомлено ✓';
             ackBtn.disabled=true;
@@ -22,25 +24,42 @@ document.addEventListener('DOMContentLoaded', function(){
     const pwdBtn = document.getElementById('pwdCheckBtn');
 
     if(pwdInput && pwdBtn){
+        console.log("Found password checker elements");
+
         // Real-time password strength indicator
         pwdInput.addEventListener('input', function(){
             const password = this.value;
+            console.log("Password input:", password);
             updatePasswordStrength(password);
 
             // Enable/disable check button based on input
             pwdBtn.disabled = password.length === 0;
+
+            // Show/hide save button
+            updateSaveButton(password);
         });
 
         // Manual check button
         pwdBtn.addEventListener('click', function(){
             const password = pwdInput.value;
-            updatePasswordStrength(password);
-            showNotification('Пароль проверен', 'info');
+            console.log("Checking password:", password);
+            const result = updatePasswordStrength(password);
+            showNotification('Пароль проверен. Оценка: ' + result.score + '%', 'info');
+
+            // Automatically suggest saving good passwords
+            if (result.score >= 80) {
+                setTimeout(() => {
+                    if (confirm('Это отличный пароль! Сохранить в избранное?')) {
+                        savePasswordToServer(password, result.score);
+                    }
+                }, 300);
+            }
         });
 
         // Enter key support
         pwdInput.addEventListener('keypress', function(e){
             if(e.key === 'Enter' && this.value.length > 0){
+                console.log("Enter pressed");
                 pwdBtn.click();
             }
         });
@@ -48,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // Password strength calculation function
     function updatePasswordStrength(password){
+        console.log("updatePasswordStrength called with:", password);
         let score = 0;
         const requirements = {
             length: password.length >= 8,
@@ -57,6 +77,8 @@ document.addEventListener('DOMContentLoaded', function(){
             special: /[^A-Za-z0-9]/.test(password)
         };
 
+        console.log("Requirements:", requirements);
+
         // Calculate score
         Object.values(requirements).forEach(req => {
             if(req) score++;
@@ -65,6 +87,8 @@ document.addEventListener('DOMContentLoaded', function(){
         const pct = Math.round(score/5*100);
         const prog = document.querySelector('.progress');
         const pwdLabel = document.getElementById('pwdLabel');
+
+        console.log("Score:", score, "Percentage:", pct);
 
         if(prog){
             prog.style.width = pct + '%';
@@ -87,10 +111,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
         // Update requirements display if exists
         updatePasswordRequirements(requirements);
+
+        return {score: pct, requirements: requirements};
     }
 
     // Password requirements display
     function updatePasswordRequirements(requirements){
+        console.log("updatePasswordRequirements called with:", requirements);
         const reqElements = {
             length: document.getElementById('req-length'),
             upper: document.getElementById('req-upper'),
@@ -115,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // Trainer (mini-game): one question at a time, random order
     const quizEl = document.getElementById('quiz-container');
     if(quizEl){
+        console.log("Found quiz container");
         const pool = [
             {q:'Выберите самый надёжный пароль', opts:['123456','qwerty','M#9k!2zL@7pT'], correct:2},
             {q:'Выберите самый лёгкий пароль', opts:['P@ssw0rd123','admin','S!lverM00n!'], correct:1},
@@ -249,17 +277,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // Notification system
     function showNotification(message, type = 'info') {
-        // Remove existing notification
-        const existingNotification = document.querySelector('.notification');
-        if(existingNotification){
-            existingNotification.remove();
-        }
+        console.log("Showing notification:", message, type);
 
+        // Create notification
         const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
+        notification.className = 'notification';
         notification.textContent = message;
-
-        // Add styles
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -268,26 +291,44 @@ document.addEventListener('DOMContentLoaded', function(){
             border-radius: 5px;
             color: white;
             font-weight: bold;
-            z-index: 1000;
+            z-index: 10000;
             animation: slideIn 0.3s ease-out;
             max-width: 300px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 14px;
         `;
 
         switch(type){
             case 'success':
                 notification.style.background = 'var(--green)';
+                notification.style.borderLeft = '4px solid #00a842';
                 break;
             case 'error':
                 notification.style.background = 'var(--red)';
+                notification.style.borderLeft = '4px solid #cc0000';
                 break;
             case 'warning':
                 notification.style.background = '#f1c40f';
+                notification.style.borderLeft = '4px solid #d4ac0d';
                 break;
             default:
                 notification.style.background = '#3498db';
+                notification.style.borderLeft = '4px solid #2980b9';
         }
 
+        // Remove old notifications
+        const oldNotifications = document.querySelectorAll('.notification');
+        oldNotifications.forEach((note, index) => {
+            setTimeout(() => {
+                if (note.parentNode) {
+                    note.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => note.remove(), 300);
+                }
+            }, index * 100);
+        });
+
+        // Add new notification
         document.body.appendChild(notification);
 
         // Auto remove after 3 seconds
@@ -299,30 +340,45 @@ document.addEventListener('DOMContentLoaded', function(){
         }, 3000);
     }
 
-    // Add CSS animations for notifications
+    // Add CSS animations if not exists
     if(!document.querySelector('#notification-styles')){
         const style = document.createElement('style');
         style.id = 'notification-styles';
         style.textContent = `
             @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
             }
             @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
             }
         `;
         document.head.appendChild(style);
     }
 
-    // Password generator helper (optional feature)
+    // Password generator helper
     const generatePwdBtn = document.getElementById('generatePwdBtn');
     if(generatePwdBtn && pwdInput){
+        console.log("Found generate password button");
         generatePwdBtn.addEventListener('click', function(){
+            console.log("Generate password clicked");
             const generatedPassword = generateStrongPassword();
             pwdInput.value = generatedPassword;
             updatePasswordStrength(generatedPassword);
+            updateSaveButton(generatedPassword);
             showNotification('Пароль сгенерирован!', 'success');
         });
     }
@@ -355,12 +411,15 @@ document.addEventListener('DOMContentLoaded', function(){
     // Clear all progress button
     const clearProgressBtn = document.getElementById('clearProgressBtn');
     if(clearProgressBtn){
+        console.log("Found clear progress button");
         clearProgressBtn.addEventListener('click', function(){
             if(confirm('Вы уверены, что хотите сбросить весь прогресс? Это действие нельзя отменить.')){
                 localStorage.removeItem('infoViewed');
                 localStorage.removeItem('trainerPassed');
                 localStorage.removeItem('trainerScore');
                 localStorage.removeItem('passwordChecked');
+                localStorage.removeItem('passwordGameProgress');
+                localStorage.removeItem('passwordGameCompleted');
                 updateProfileStatuses();
                 showNotification('Прогресс сброшен', 'info');
             }
@@ -369,4 +428,102 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // Auto-save progress every 30 seconds
     setInterval(updateProfileStatuses, 30000);
+
+    // Add save to favorites button dynamically
+    function addSaveToFavoritesButton() {
+        const passwordCard = document.querySelector('.card:has(#pwdInput)');
+        if (passwordCard && !document.getElementById('saveToFavoritesBtn')) {
+            const saveBtn = document.createElement('button');
+            saveBtn.id = 'saveToFavoritesBtn';
+            saveBtn.className = 'btn secondary';
+            saveBtn.textContent = '⭐ Сохранить в избранное';
+            saveBtn.style.marginTop = '10px';
+            saveBtn.style.display = 'none';
+
+            saveBtn.addEventListener('click', async function() {
+                const password = document.getElementById('pwdInput').value;
+                if (!password) {
+                    showNotification('Введите пароль сначала', 'error');
+                    return;
+                }
+
+                const score = calculatePasswordScore(password);
+                const success = await savePasswordToServer(password, score);
+                if (success) {
+                    this.style.display = 'none';
+                }
+            });
+
+            passwordCard.appendChild(saveBtn);
+        }
+    }
+
+    // Update save button visibility
+    function updateSaveButton(password) {
+        const saveBtn = document.getElementById('saveToFavoritesBtn');
+        if (!saveBtn) {
+            addSaveToFavoritesButton();
+            return;
+        }
+
+        const score = calculatePasswordScore(password);
+        if (score >= 60 && password.length >= 8) {
+            saveBtn.style.display = 'block';
+        } else {
+            saveBtn.style.display = 'none';
+        }
+    }
+
+    // Calculate password score
+    function calculatePasswordScore(password) {
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        return Math.round(score/5*100);
+    }
+
+    // Save password to server
+    async function savePasswordToServer(password, score) {
+        try {
+            const response = await fetch('/api/save-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    password: password,
+                    score: score
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Пароль сохранен в избранное!', 'success');
+
+                // Suggest going to favorites
+                setTimeout(() => {
+                    if (confirm('Пароль сохранен! Хотите перейти в избранное, чтобы посмотреть все сохраненные пароли?')) {
+                        window.location.href = '/favorites';
+                    }
+                }, 500);
+
+                return true;
+            } else {
+                showNotification('Ошибка сохранения пароля', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error saving password:', error);
+            showNotification('Ошибка сохранения пароля', 'error');
+            return false;
+        }
+    }
+
+    // Initialize save button
+    setTimeout(addSaveToFavoritesButton, 100);
+
+    console.log("All JavaScript initialized successfully");
 });

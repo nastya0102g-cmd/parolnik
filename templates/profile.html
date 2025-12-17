@@ -11,24 +11,120 @@
     <div class="container">
         <div class="card header">
             <div class="title">Личный кабинет</div>
-            <button class="icon-btn" onclick="location.href='/navigation'">←</button>
+            <div>
+                <button class="icon-btn" onclick="location.href='/search'">🔍</button>
+                <button class="icon-btn" onclick="location.href='/favorites'">⭐</button>
+                <button class="icon-btn" onclick="location.href='/navigation'">←</button>
+            </div>
         </div>
+
+        <div class="profile-grid">
+            <!-- Левая колонка -->
+            <div class="card">
+                <h3>Информация о пользователе</h3>
+                {% if user %}
+                <p><strong>Имя:</strong> {{ user.name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Дата регистрации:</strong> {{ user.created_at[:10] if user.created_at else 'Неизвестно' }}</p>
+                {% endif %}
+
+                <button class="btn" onclick="location.href='/navigation'">В навигацию</button>
+                <button class="btn secondary" onclick="location.href='/logout'">Выйти из аккаунта</button>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="card">
+                <h3>Статусы</h3>
+                <p>Ознакомление: <span id="ackStatus">Загрузка...</span></p>
+                <p>Тренажёр: <span id="trainerStatus">Загрузка...</span></p>
+                <p>Проверка пароля: <span id="pwdStatus">Загрузка...</span></p>
+            </div>
+        </div>
+
+        <!-- Сохраненные пароли -->
         <div class="card">
-            <h3>Информация о пользователе</h3>
-            {% if user %}
-            <p><strong>Имя:</strong> {{ user.name }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Дата регистрации:</strong> {{ user.created_at[:10] if user.created_at else 'Неизвестно' }}</p>
+            <h3>⭐ Недавно сохраненные пароли</h3>
+            {% if saved_passwords and saved_passwords|length > 0 %}
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 10px; text-align: left;">Пароль</th>
+                            <th style="padding: 10px; text-align: left;">Надежность</th>
+                            <th style="padding: 10px; text-align: left;">Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pwd in saved_passwords %}
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px;">
+                                <span style="font-family: monospace; background: #f9f9f9; padding: 4px 8px; border-radius: 4px;">
+                                    {{ pwd.password_hash[:3] }}•••{{ pwd.password_hash[-3:] if pwd.password_hash|length > 6 else '•••' }}
+                                </span>
+                            </td>
+                            <td style="padding: 10px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="progress-bar" style="width: 80px;">
+                                        <div class="progress" style="width: {{ pwd.strength_score }}%;
+                                            background: {% if pwd.strength_score >= 80 %}var(--green)
+                                                       {% elif pwd.strength_score >= 60 %}#f1c40f
+                                                       {% else %}var(--red){% endif %};">
+                                        </div>
+                                    </div>
+                                    <span>{{ pwd.strength_score }}%</span>
+                                </div>
+                            </td>
+                            <td style="padding: 10px;">
+                                {{ pwd.created_at[:10] if pwd.created_at else '' }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="btn secondary" onclick="location.href='/favorites'">
+                    Все сохраненные пароли ({{ saved_passwords|length }})
+                </button>
+            </div>
+            {% else %}
+            <p style="text-align: center; padding: 20px; color: #666;">
+                У вас нет сохраненных паролей. Проверьте свой первый пароль!
+            </p>
+            <div style="text-align: center;">
+                <button class="btn" onclick="location.href='/check-password'">
+                    Проверить пароль
+                </button>
+            </div>
             {% endif %}
-
-            <h3>Статусы</h3>
-            <p>Ознакомление: <span id="ackStatus">Загрузка...</span></p>
-            <p>Тренажёр: <span id="trainerStatus">Загрузка...</span></p>
-            <p>Проверка пароля: <span id="pwdStatus">Загрузка...</span></p>
-
-            <p><button class="btn" onclick="location.href='/navigation'">В навигацию</button></p>
-            <p><button class="btn secondary" onclick="location.href='/logout'">Выйти из аккаунта</button></p>
         </div>
+
+        <!-- Быстрые действия -->
+        <div class="cards-grid">
+            <div class="card">
+                <h3>⚡ Быстрые действия</h3>
+                <button class="btn" onclick="location.href='/check-password'">
+                    Проверить пароль
+                </button>
+                <button class="btn secondary" onclick="location.href='/trainer'">
+                    Пройти тренажер
+                </button>
+                <button class="btn secondary" onclick="location.href='/favorites'">
+                    Мои сохраненные пароли
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>⚙️ Настройки</h3>
+                <button class="btn secondary" id="clearProgressBtn">
+                    Сбросить локальный прогресс
+                </button>
+                <button class="btn" onclick="location.href='/search'">
+                    Поиск советов
+                </button>
+            </div>
+        </div>
+
         <footer class="contacts">
             <h3>Контакты</h3>
             <a href="tel:+77053652869">📞 +7 (705) 365-28-69</a>

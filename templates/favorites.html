@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Сохраненные пароли</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card header">
+            <div class="title">⭐ Сохраненные пароли</div>
+            <div>
+                <button class="icon-btn" onclick="location.href='/search'">🔍</button>
+                <button class="icon-btn" onclick="location.href='/profile'">👤</button>
+                <button class="icon-btn" onclick="location.href='/navigation'">←</button>
+                <button class="icon-btn" id="refreshBtn" title="Обновить" onclick="loadSavedPasswords()">🔄</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Ваши проверенные пароли</h3>
+                <div>
+                    <button class="btn" onclick="location.href='/check-password'">
+                        + Проверить новый
+                    </button>
+                    <button class="btn secondary" onclick="loadSavedPasswords()" style="margin-left: 10px;">
+                        Обновить список
+                    </button>
+                </div>
+            </div>
+
+            <div id="savedPasswordsList">
+                <!-- Динамически загружаемые пароли -->
+                <p style="text-align: center; padding: 20px;">Загрузка паролей...</p>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <h3>📊 Быстрая статистика</h3>
+                <div id="quickStats" style="padding: 15px;">
+                    <p>Загрузка статистики...</p>
+                </div>
+                <button class="btn secondary" onclick="location.href='/check-password'">
+                    Проверить новый пароль
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>💡 Советы по безопасности</h3>
+                <ul style="padding-left: 20px;">
+                    <li>Никогда не используйте один пароль для разных сервисов</li>
+                    <li>Регулярно меняйте важные пароли</li>
+                    <li>Не храните пароли в открытом виде</li>
+                    <li>Используйте менеджер паролей</li>
+                </ul>
+                <button class="btn secondary" onclick="location.href='/search'" style="margin-top: 15px;">
+                    Больше советов
+                </button>
+            </div>
+        </div>
+
+        <footer class="contacts">
+            <h3>📞 Контакты</h3>
+            <a href="tel:+77053652869">+7 (705) 365-28-69</a>
+            <a href="https://instagram.com/Rosa_Mirova">@Rosa_Mirova</a>
+        </footer>
+    </div>
+
+    <script>
+    // Функции для работы с избранным
+    async function loadSavedPasswords() {
+        try {
+            document.getElementById('savedPasswordsList').innerHTML =
+                '<p style="text-align: center; padding: 20px;">Загрузка паролей...</p>';
+
+            const response = await fetch('/api/saved-passwords');
+            if (response.ok) {
+                const data = await response.json();
+                displayPasswords(data.passwords);
+                updateQuickStats(data.passwords);
+            } else {
+                console.error('Failed to load passwords:', response.status);
+                document.getElementById('savedPasswordsList').innerHTML =
+                    '<p style="color: var(--red); text-align: center;">Ошибка загрузки паролей</p>';
+            }
+        } catch (error) {
+            console.error('Error loading passwords:', error);
+            document.getElementById('savedPasswordsList').innerHTML =
+                '<p style="color: var(--red); text-align: center;">Ошибка загрузки паролей</p>';
+        }
+    }
+
+    function displayPasswords(passwords) {
+        const container = document.getElementById('savedPasswordsList');
+
+        if (!passwords || passwords.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <h3>😔 У вас нет сохраненных паролей</h3>
+                    <p>Проверьте свой первый пароль, чтобы начать коллекцию!</p>
+                    <button class="btn" onclick="location.href='/check-password'" style="margin-top: 20px;">
+                        Перейти к проверке пароля
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="data-table"><table><thead><tr><th>ID</th><th>Пароль</th><th>Надежность</th><th>Дата сохранения</th><th>Действия</th></tr></thead><tbody>';
+
+        passwords.forEach(pwd => {
+            const date = pwd.created_at ? new Date(pwd.created_at).toLocaleDateString('ru-RU') : 'Неизвестно';
+            const strengthColor = pwd.strength_score >= 80 ? 'var(--green)' :
+                                pwd.strength_score >= 60 ? '#f1c40f' : 'var(--red)';
+            const strengthText = pwd.strength_score >= 80 ? 'Отличный' :
+                               pwd.strength_score >= 60 ? 'Хороший' : 'Слабый';
+
+            // Маскируем пароль для безопасности
+            const maskedPassword = pwd.password_hash.length > 6 ?
+                pwd.password_hash.substring(0, 3) + '•'.repeat(pwd.password_hash.length - 6) + pwd.password_hash.substring(pwd.password_hash.length - 3) :
+                '••••••';
+
+            html += `
+                <tr>
+                    <td>#${pwd.id}</td>
+                    <td>
+                        <span style="font-family: monospace; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; letter-spacing: 1px;">
+                            ${maskedPassword}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="progress-bar" style="width: 100px;">
+                                <div class="progress" style="width: ${pwd.strength_score}%; background: ${strengthColor};"></div>
+                            </div>
+                            <span>${pwd.strength_score}% (${strengthText})</span>
+                        </div>
+                    </td>
+                    <td>${date}</td>
+                    <td>
+                        <button class="btn secondary" onclick="copyPassword('${pwd.password_hash}', ${pwd.id})"
+                                style="padding: 8px 15px; font-size: 14px; margin: 0 5px;">
+                            Копировать
+                        </button>
+                        <button class="btn secondary" onclick="deletePassword(${pwd.id})"
+                                style="padding: 8px 15px; font-size: 14px; margin: 0 5px; background: var(--red); color: white;">
+                            Удалить
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table></div>';
+
+        // Статистика
+        const total = passwords.length;
+        const avgScore = Math.round(passwords.reduce((sum, p) => sum + p.strength_score, 0) / total);
+
+        html += `
+            <div style="margin-top: 20px; text-align: center; padding: 15px; background: #f9f9f9; border-radius: 10px;">
+                <p><strong>Статистика:</strong> Всего сохранено: ${total} паролей | Средняя надежность: ${avgScore}%</p>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function updateQuickStats(passwords) {
+        const quickStats = document.getElementById('quickStats');
+        if (!passwords || passwords.length === 0) {
+            quickStats.innerHTML = '<p>Нет сохраненных паролей</p>';
+            return;
+        }
+
+        const total = passwords.length;
+        const avgScore = Math.round(passwords.reduce((sum, p) => sum + p.strength_score, 0) / total);
+        const strongCount = passwords.filter(p => p.strength_score >= 80).length;
+        const weakCount = passwords.filter(p => p.strength_score < 60).length;
+
+        quickStats.innerHTML = `
+            <div style="text-align: center;">
+                <div style="font-size: 32px; font-weight: bold; color: var(--orange); margin: 10px 0;">${total}</div>
+                <div>всего паролей</div>
+                <div style="margin-top: 15px;">
+                    <div>🏆 Сильных: ${strongCount}</div>
+                    <div>📊 Средний балл: ${avgScore}%</div>
+                    <div>⚠️ Слабых: ${weakCount}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    async function deletePassword(passwordId) {
+        if (!confirm('Вы уверены, что хотите удалить этот пароль?')) return;
+
+        try {
+            const response = await fetch(`/api/saved-passwords/${passwordId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    alert('Пароль удален');
+                    loadSavedPasswords(); // Перезагружаем список
+                } else {
+                    alert('Ошибка при удалении пароля');
+                }
+            } else {
+                alert('Ошибка при удалении пароля');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ошибка при удалении пароля');
+        }
+    }
+
+    function copyPassword(password, passwordId) {
+        // Копируем в буфер обмена
+        navigator.clipboard.writeText(password).then(() => {
+            alert('Пароль скопирован в буфер обмена!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            alert('Не удалось скопировать пароль');
+        });
+    }
+
+    // Загружаем пароли при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSavedPasswords();
+    });
+    </script>
+</body>
+</html>
